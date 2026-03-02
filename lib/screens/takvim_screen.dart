@@ -1,17 +1,15 @@
 // lib/screens/takvim_screen.dart – M3 Redesign
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import '../models/police_model.dart';
 import '../services/database_service.dart';
 import '../services/notification_service.dart';
 
 const _kPrimary = Color(0xFF1565C0);
-const _kSurface = Color(0xFFF0F5FF);
-const _kText    = Color(0xFF1A1A2E);
-const _kText2   = Color(0xFF7A8AAA);
-const _kBorder  = Color(0xFFE8EEFF);
 const _kWarn    = Color(0xFFE65100);
 const _kErr     = Color(0xFFC62828);
+// Dinamik: context.bgCard, context.bgScaffold, context.textMain vb.
 
 class TakvimScreen extends StatefulWidget {
   final int? policeId;
@@ -30,8 +28,9 @@ class _TakvimScreenState extends State<TakvimScreen> {
   int _ay  = DateTime.now().month;
 
   DateTime?       _seciliGun;
-  List<Police>    _ayListe   = [];
-  List<Police>    _gunListe  = [];
+  List<Police>    _ayListe       = [];
+  List<Police>    _tumPoliceler  = [];   // tüm poliçeler (not ekle seçimi için)
+  List<Police>    _gunListe      = [];
   Map<int,List<Police>> _ayEtkinlikleri = {};
   bool _yukl = true;
 
@@ -48,6 +47,8 @@ class _TakvimScreenState extends State<TakvimScreen> {
   Future<void> _yukle() async {
     setState(() => _yukl = true);
     final liste = await _db.aylik(_yil, _ay);
+    // Not ekleme için tüm yılın poliçelerini yükle
+    final tumListe = await _db.yillikTumPoliceler(_yil);
     final etk = <int, List<Police>>{};
     for (final p in liste) {
       final gun = p.bitisTarihi.day;
@@ -61,6 +62,7 @@ class _TakvimScreenState extends State<TakvimScreen> {
     }
     setState(() {
       _ayListe = liste;
+      _tumPoliceler = tumListe;
       _ayEtkinlikleri = etk;
       _yukl = false;
     });
@@ -91,7 +93,7 @@ class _TakvimScreenState extends State<TakvimScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => _NotSheet(
         gun: _seciliGun ?? DateTime(_yil, _ay),
-        policeler: _ayListe,
+        policeler: _tumPoliceler,
         onKaydet: (tarih, not, police) async {
           final guncellenmis = police.copyWith(hatirlaticiTarihi: tarih, hatirlaticiNotu: not);
           await _db.guncelle(guncellenmis);
@@ -110,15 +112,15 @@ class _TakvimScreenState extends State<TakvimScreen> {
   Widget build(BuildContext context) {
     final bool modal = widget.policeId != null;
     return Scaffold(
-      backgroundColor: _kSurface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: modal ? IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
         ) : null,
         title: RichText(text: const TextSpan(
-          style: TextStyle(fontSize: 19, fontWeight: FontWeight.w900, color: _kText),
+          style: TextStyle(fontSize: 19, fontWeight: FontWeight.w900, color: context.textMain),
           children: [
             TextSpan(text: 'CRM '),
             TextSpan(text: 'Takvimi', style: TextStyle(color: _kPrimary)),
@@ -126,7 +128,7 @@ class _TakvimScreenState extends State<TakvimScreen> {
         )),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: context.border),
         ),
         actions: [
           IconButton(
@@ -148,7 +150,7 @@ class _TakvimScreenState extends State<TakvimScreen> {
                     child: Text(
                       '${_aylar[_ay]} $_yil',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _kText),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textMain),
                     ),
                   ),
                   _ArrBtn(icon: Icons.chevron_right, onTap: _sonrakiAy),
@@ -156,14 +158,14 @@ class _TakvimScreenState extends State<TakvimScreen> {
               ),
               // ── Gün başlıkları ──
               Container(
-                color: _kSurface,
+                color: context.bgScaffold,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: Row(children: _gunler.map((g) => Expanded(
                   child: Text(g,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 10, fontWeight: FontWeight.w800,
-                      color: (g=='Ct'||g=='Pz') ? _kWarn : _kText2,
+                      color: (g=='Ct'||g=='Pz') ? _kWarn : context.textSub,
                     ),
                   ),
                 )).toList()),
@@ -175,16 +177,16 @@ class _TakvimScreenState extends State<TakvimScreen> {
                 seciliGun: _seciliGun,
                 onGunSec: _gunSecildi,
               ),
-              const Divider(height: 1, color: _kBorder),
+              Divider(height: 1, color: context.border),
               // ── Seçili gün başlığı ──
               if (_seciliGun != null)
                 Container(
-                  color: Colors.white,
+                  color: context.bgCard,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                   child: Row(children: [
                     Text(
                       DateFormat('d MMMM y', 'tr').format(_seciliGun!),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: _kText),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textMain),
                     ),
                     const SizedBox(width: 8),
                     if (_gunListe.isNotEmpty)
@@ -265,7 +267,7 @@ class _TakvimGrid extends StatelessWidget {
     final satirSayisi = (cells / 7).ceil();
 
     return Container(
-      color: _kSurface,
+      color: context.bgScaffold,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Column(children: List.generate(satirSayisi, (satir) {
         return Row(children: List.generate(7, (sutun) {
@@ -297,7 +299,7 @@ class _TakvimGrid extends StatelessWidget {
                       color: seciliMu ? Colors.white
                            : bugunMu ? _kPrimary
                            : haftatatiMi ? _kWarn
-                           : _kText,
+                           : context.textMain,
                     ),
                   ),
                   if (etkinlikVar) Container(
@@ -333,7 +335,7 @@ class _EtkinlikKart extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgCard,
         borderRadius: BorderRadius.circular(14),
         border: Border(left: BorderSide(color: bitisMi ? _kErr : _kWarn, width: 3)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2))],
@@ -351,8 +353,8 @@ class _EtkinlikKart extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(p.tamAd, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: _kText)),
-            Text('${p.goruntulenenTur} · ${p.sirket}', style: const TextStyle(fontSize: 10.5, color: _kText2)),
+            Text(p.tamAd, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: context.textMain)),
+            Text('\${p.goruntulenenTur} · \${p.sirket}', style: TextStyle(fontSize: 10.5, color: context.textSub)),
             const SizedBox(height: 3),
             if (bitisMi) Row(children: [
               Icon(Icons.event_busy_outlined, size: 11, color: _kErr),
@@ -473,7 +475,7 @@ class _NotSheetState extends State<_NotSheet> {
               width: 36, height: 4,
               decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
             const SizedBox(height: 16),
-            const Text('Hatırlatıcı Ekle', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: _kText)),
+            Text('Hatırlatıcı Ekle', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: context.textMain)),
             const SizedBox(height: 16),
 
             // Poliçe seç
@@ -482,7 +484,7 @@ class _NotSheetState extends State<_NotSheet> {
               const SizedBox(height: 6),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: _kBorder),
+                  border: Border.all(color: context.border),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: DropdownButtonHideUnderline(
@@ -493,9 +495,18 @@ class _NotSheetState extends State<_NotSheet> {
                     hint: const Text('Poliçe seçin…', style: TextStyle(color: _kText2, fontSize: 13)),
                     items: widget.policeler.map((p) => DropdownMenuItem(
                       value: p,
-                      child: Text('${p.tamAd} – ${p.goruntulenenTur}',
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(p.tur.emoji, style: const TextStyle(fontSize: 16)),
+                          const SizedBox(width: 8),
+                          Flexible(child: Text(
+                            '${p.tamAd} – ${p.goruntulenenTur}',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          )),
+                        ],
+                      ),
                     )).toList(),
                     onChanged: (p) => setState(() => _seciliPolice = p),
                   ),
@@ -516,6 +527,8 @@ class _NotSheetState extends State<_NotSheet> {
                     Text(_seciliPolice!.tamAd, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
                     Text('${_seciliPolice!.goruntulenenTur} · ${_seciliPolice!.sirket}',
                       style: const TextStyle(fontSize: 11, color: _kText2)),
+                    Text('Bitiş: ${DateFormat('d MMM y', 'tr').format(_seciliPolice!.bitisTarihi)} · ${_seciliPolice!.kalanGun} gün kaldı',
+                      style: TextStyle(fontSize: 10, color: _seciliPolice!.kalanGun <= 10 ? _kErr : _kText2, fontWeight: FontWeight.w700)),
                   ])),
                 ]),
               ),
@@ -532,9 +545,9 @@ class _NotSheetState extends State<_NotSheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      border: Border.all(color: _kBorder),
+                      border: Border.all(color: context.border),
                       borderRadius: BorderRadius.circular(12),
-                      color: _kSurface,
+                      color: context.bgScaffold,
                     ),
                     child: Row(children: [
                       const Icon(Icons.calendar_today_outlined, size: 15, color: _kPrimary),
@@ -554,9 +567,9 @@ class _NotSheetState extends State<_NotSheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      border: Border.all(color: _kBorder),
+                      border: Border.all(color: context.border),
                       borderRadius: BorderRadius.circular(12),
-                      color: _kSurface,
+                      color: context.bgScaffold,
                     ),
                     child: Row(children: [
                       const Icon(Icons.access_time_outlined, size: 15, color: _kPrimary),
@@ -618,9 +631,9 @@ class _ArrBtn extends StatelessWidget {
     child: Container(
       width: 32, height: 32,
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFD0DCEE), width: 1.5),
+        border: Border.all(color: context.border, width: 1.5),
         borderRadius: BorderRadius.circular(50),
-        color: Colors.white,
+        color: context.bgCard,
       ),
       child: Icon(icon, size: 18, color: _kPrimary),
     ),

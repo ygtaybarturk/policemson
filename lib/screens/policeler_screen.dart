@@ -1,5 +1,6 @@
 // lib/screens/policeler_screen.dart – M3 Redesign
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 import '../main.dart' show ThemeNotifier;
 import 'package:intl/intl.dart';
 import 'excel_import_screen.dart';
@@ -10,12 +11,8 @@ import 'police_detay_screen.dart';
 import 'police_form_screen.dart';
 import 'takvim_screen.dart';
 
-// ── Renk sabitleri ────────────────────────────────────────
+// Renkler context.bgCard, context.textMain vb. ile alınır (app_colors.dart)
 const _kPrimary = Color(0xFF1565C0);
-const _kSurface = Color(0xFFF0F5FF);
-const _kText    = Color(0xFF1A1A2E);
-const _kText2   = Color(0xFF7A8AAA);
-const _kBorder  = Color(0xFFE8EEFF);
 
 class PolicelerScreen extends StatefulWidget {
   const PolicelerScreen({super.key});
@@ -140,9 +137,9 @@ class _PolicelerScreenState extends State<PolicelerScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kSurface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.bgCard,
         title: _aramaAcik
             ? TextField(
                 controller: _aramaCtrl,
@@ -151,13 +148,13 @@ class _PolicelerScreenState extends State<PolicelerScreen>
                   hintText: 'Ad, soyad ara...',
                   border: InputBorder.none,
                   filled: false,
-                  hintStyle: TextStyle(color: _kText2, fontSize: 16),
+                  hintStyle: TextStyle(color: context.textSub, fontSize: 16),
                 ),
-                style: const TextStyle(fontSize: 16, color: _kText),
+                style: TextStyle(fontSize: 16, color: context.textMain),
               )
             : RichText(
                 text: const TextSpan(
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.w900, color: _kText),
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.w900, color: context.textMain),
                   children: [
                     TextSpan(text: 'Poli'),
                     TextSpan(text: 'çem', style: TextStyle(color: _kPrimary)),
@@ -166,7 +163,7 @@ class _PolicelerScreenState extends State<PolicelerScreen>
               ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _kBorder),
+          child: Container(height: 1, color: context.border),
         ),
         actions: [
           if (_aramaAcik)
@@ -201,7 +198,7 @@ class _PolicelerScreenState extends State<PolicelerScreen>
     return Column(children: [
       // Ay navigasyon
       Container(
-        color: Colors.white,
+        color: context.bgCard,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(children: [
           _ArrBtn(icon: Icons.chevron_left, onTap: _oncekiAy),
@@ -209,7 +206,7 @@ class _PolicelerScreenState extends State<PolicelerScreen>
             child: Text(
               '${_aylar[_ay]} $_yil',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _kText),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.textMain),
             ),
           ),
           _ArrBtn(icon: Icons.chevron_right, onTap: _sonrakiAy),
@@ -217,7 +214,7 @@ class _PolicelerScreenState extends State<PolicelerScreen>
       ),
       // Ay chip listesi
       Container(
-        color: Colors.white,
+        color: context.bgCard,
         padding: const EdgeInsets.only(bottom: 10),
         child: SizedBox(
           height: 36,
@@ -236,7 +233,7 @@ class _PolicelerScreenState extends State<PolicelerScreen>
                   margin: const EdgeInsets.only(right: 6),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: on ? _kPrimary : const Color(0xFFEEF3FF),
+                    color: on ? _kPrimary : context.bgSurface,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -275,7 +272,7 @@ class _PolicelerScreenState extends State<PolicelerScreen>
       ),
       // Filtre tabları
       Container(
-        color: _kSurface,
+        color: context.bgScaffold,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: SizedBox(
           height: 34,
@@ -291,10 +288,10 @@ class _PolicelerScreenState extends State<PolicelerScreen>
                   margin: const EdgeInsets.only(right: 7),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: on ? const Color(0xFFE3F0FF) : Colors.white,
+                    color: on ? context.primaryContainer : context.bgCard,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: on ? _kPrimary : const Color(0xFFD0DCEE),
+                      color: on ? _kPrimary : context.border,
                       width: 1.5,
                     ),
                   ),
@@ -348,13 +345,13 @@ class _PolicelerScreenState extends State<PolicelerScreen>
     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Container(
         width: 80, height: 80,
-        decoration: BoxDecoration(color: const Color(0xFFEEF3FF), borderRadius: BorderRadius.circular(24)),
+        decoration: BoxDecoration(color: context.bgSurface, borderRadius: BorderRadius.circular(24)),
         child: const Icon(Icons.description_outlined, size: 40, color: Color(0xFF9AAAC0)),
       ),
       const SizedBox(height: 16),
-      const Text('Bu ay için poliçe yok', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _kText2)),
+      Text('Bu ay için poliçe yok', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.textSub)),
       const SizedBox(height: 6),
-      const Text('+ butonuyla poliçe ekleyebilirsiniz', style: TextStyle(fontSize: 12, color: _kText2)),
+      Text('+ butonuyla poliçe ekleyebilirsiniz', style: TextStyle(fontSize: 12, color: context.textSub)),
     ]),
   );
 
@@ -365,13 +362,13 @@ class _PolicelerScreenState extends State<PolicelerScreen>
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Icon(Icons.search, size: 48, color: _kText2.withOpacity(0.4)),
           const SizedBox(height: 12),
-          Text('Ad veya soyad yazın', style: TextStyle(color: _kText2, fontSize: 14)),
+          Text('Ad veya soyad yazın', style: TextStyle(color: context.textSub, fontSize: 14)),
         ]),
       );
     }
     if (_aramaYukl) return const Center(child: CircularProgressIndicator());
     if (_aramaListesi.isEmpty) return Center(
-      child: Text('Sonuç bulunamadı', style: TextStyle(color: _kText2, fontSize: 14)),
+      child: Text('Sonuç bulunamadı', style: TextStyle(color: context.textSub, fontSize: 14)),
     );
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -409,9 +406,9 @@ class _ArrBtn extends StatelessWidget {
     child: Container(
       width: 32, height: 32,
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFD0DCEE), width: 1.5),
+        border: Border.all(color: context.border, width: 1.5),
         borderRadius: BorderRadius.circular(50),
-        color: Colors.white,
+        color: context.bgCard,
       ),
       child: Icon(icon, size: 18, color: _kPrimary),
     ),
@@ -428,7 +425,7 @@ class _FabSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(28)),
+      decoration: BoxDecoration(color: context.bgCard, borderRadius: BorderRadius.circular(28)),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Container(width: 36, height: 4,
           decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
@@ -465,7 +462,7 @@ class _MenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: _kSurface,
+    color: context.bgScaffold,
     borderRadius: BorderRadius.circular(16),
     child: InkWell(
       onTap: onTap,
@@ -480,7 +477,7 @@ class _MenuTile extends StatelessWidget {
           ),
           const SizedBox(width: 14),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: _kText)),
+            Text(title, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: context.textMain)),
             const SizedBox(height: 2),
             Text(sub, style: const TextStyle(fontSize: 11.5, color: _kText2)),
           ])),
@@ -525,9 +522,10 @@ class _PoliceKarti extends StatelessWidget {
     final p   = police;
     final fmt = DateFormat('d MMM y', 'tr');
     final acil   = p.kalanGun <= 10 && p.durum == PoliceStatus.beklemede;
+    final baslandiMi = DateTime.now().isAfter(p.baslangicTarihi) || DateTime.now().isAtSameMomentAs(p.baslangicTarihi);
     final showBtn = p.durum == PoliceStatus.beklemede || p.durum == PoliceStatus.dahaSonra;
     final cs     = Theme.of(context).colorScheme;
-    final cardColor = Theme.of(context).cardTheme.color ?? Colors.white;
+    final cardColor = context.bgCard;
     final borderColor = Theme.of(context).dividerColor;
 
     return Padding(
@@ -603,28 +601,55 @@ class _PoliceKarti extends StatelessWidget {
                 Row(children: [
                   _MetaBit(icon: Icons.play_circle_outline, label: 'Başlangıç', val: fmt.format(p.baslangicTarihi)),
                   const SizedBox(width: 14),
-                  _MetaBit(icon: Icons.autorenew_outlined, label: 'Yenileme', val: fmt.format(p.bitisTarihi)),
+                  _MetaBit(icon: Icons.flag_outlined, label: 'Bitiş', val: fmt.format(p.bitisTarihi),
+                      color: acil ? Colors.red.shade600 : null),
                 ]),
-                const SizedBox(height: 5),
-                _MetaBit(icon: Icons.flag_outlined, label: 'Bitiş', val: fmt.format(p.bitisTarihi),
-                    color: acil ? Colors.red.shade600 : null),
-                // Acil uyarı
-                if (acil) ...[
-                  const SizedBox(height: 6),
+                const SizedBox(height: 6),
+                // Kalan gün - her zaman göster
+                Row(children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: p.kalanGun <= 3 ? const Color(0xFFFFEBEE) : const Color(0xFFFFF3E0),
+                      color: p.kalanGun <= 0
+                          ? const Color(0xFFFFEBEE)
+                          : p.kalanGun <= 3
+                              ? const Color(0xFFFFEBEE)
+                              : p.kalanGun <= 10
+                                  ? const Color(0xFFFFF3E0)
+                                  : const Color(0xFFE3F0FF),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: p.kalanGun <= 3 ? Colors.red.shade200 : Colors.orange.shade200),
+                      border: Border.all(color: p.kalanGun <= 3
+                          ? Colors.red.shade200
+                          : p.kalanGun <= 10
+                              ? Colors.orange.shade200
+                              : Colors.blue.shade100),
                     ),
                     child: Text(
-                      p.kalanGun <= 0 ? '🔴 Bugün sona eriyor!' : '⚠️ ${p.kalanGun} gün kaldı',
+                      p.kalanGun <= 0 ? '🔴 Bugün sona eriyor!'
+                          : p.kalanGun <= 10 ? '⚠️ ${p.kalanGun} gün kaldı'
+                          : '📅 ${p.kalanGun} gün kaldı',
                       style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800,
-                        color: p.kalanGun <= 3 ? Colors.red.shade700 : Colors.orange.shade800),
+                        color: p.kalanGun <= 3
+                            ? Colors.red.shade700
+                            : p.kalanGun <= 10
+                                ? Colors.orange.shade800
+                                : Colors.blue.shade700),
                     ),
                   ),
-                ],
+                  if (baslandiMi && p.durum != PoliceStatus.yapildi && p.durum != PoliceStatus.yapilamadi) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green.shade200),
+                      ),
+                      child: Text('✅ Başladı',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.green.shade700)),
+                    ),
+                  ],
+                ]),
                 // Hatırlatıcı
                 if (p.hatirlaticiTarihi != null) ...[
                   const SizedBox(height: 5),
@@ -701,9 +726,13 @@ class _StatusBadge extends StatelessWidget {
       PoliceStatus.yapildi    => ('✓ Yapıldı',   Colors.green.withOpacity(0.3)),
       PoliceStatus.yapilamadi => ('✗ Yapılamadı', Colors.red.withOpacity(0.3)),
       PoliceStatus.dahaSonra  => ('◷ Sonra',      Colors.orange.withOpacity(0.3)),
-      _ => kalanGun <= 3
+      _ => kalanGun <= 0
+          ? ('🔴 Bugün bitiyor',  Colors.red.withOpacity(0.5))
+          : kalanGun <= 3
           ? ('🔴 ${kalanGun}g',   Colors.red.withOpacity(0.45))
-          : ('⏳ Beklemede',      Colors.white.withOpacity(0.2)),
+          : kalanGun <= 10
+          ? ('⚠️ ${kalanGun}g',   Colors.orange.withOpacity(0.35))
+          : ('⏳ ${kalanGun}g',   Colors.white.withOpacity(0.2)),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

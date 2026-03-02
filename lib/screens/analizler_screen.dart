@@ -8,6 +8,7 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../models/police_model.dart';
@@ -88,7 +89,7 @@ class _AnalizlerScreenState extends State<AnalizlerScreen>
         children: [
           // ── Dönem Seçici ──────────────────────────────
           Container(
-            color: scheme.surface,
+            color: context.bgScaffold,
             padding: const EdgeInsets.symmetric(horizontal:12, vertical:10),
             child: Row(
               children: [
@@ -178,7 +179,7 @@ class _AnalizlerScreenState extends State<AnalizlerScreen>
           Text(emoji, style:const TextStyle(fontSize:22)),
           const Spacer(),
           Text(deger, style:TextStyle(fontSize:16,fontWeight:FontWeight.w900,color:renk)),
-          Text(baslik, style:TextStyle(fontSize:11,color:Colors.grey.shade600)),
+          Text(baslik, style:TextStyle(fontSize:11,color:context.textSub)),
         ],
       ),
     );
@@ -419,7 +420,7 @@ class _AnalizlerScreenState extends State<AnalizlerScreen>
               borderData: FlBorderData(show:false),
               gridData: FlGridData(
                 drawVerticalLine: false,
-                getDrawingHorizontalLine: (v) => FlLine(color:Colors.grey.shade200, strokeWidth:1),
+                getDrawingHorizontalLine: (v) => FlLine(color:Colors.grey.withOpacity(.15), strokeWidth:1),
               ),
             )),
           ),
@@ -478,7 +479,7 @@ class _AnalizlerScreenState extends State<AnalizlerScreen>
     child: Column(
       children: [
         Text(deger,style:TextStyle(fontSize:26,fontWeight:FontWeight.w900,color:renk)),
-        Text(baslik,style:TextStyle(fontSize:11,color:Colors.grey.shade600)),
+        Text(baslik,style:TextStyle(fontSize:11,color:context.textSub)),
       ],
     ),
   );
@@ -595,7 +596,7 @@ class _AnalizlerScreenState extends State<AnalizlerScreen>
   Widget _kartBaslikli(String baslik, Widget child) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.bgCard,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [BoxShadow(color:Colors.black.withOpacity(.05),blurRadius:8,offset:const Offset(0,2))],
       ),
@@ -603,7 +604,7 @@ class _AnalizlerScreenState extends State<AnalizlerScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(baslik,style:const TextStyle(fontSize:13,fontWeight:FontWeight.w800)),
+          Text(baslik,style:TextStyle(fontSize:13,fontWeight:FontWeight.w800,color:context.textMain)),
           const SizedBox(height:12),
           child,
         ],
