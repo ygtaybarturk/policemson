@@ -1,0 +1,32 @@
+workflows:
+  android-release:
+    name: Android APK Build
+    max_build_duration: 120
+    environment:
+      flutter: 3.27.4
+      java: 17
+    scripts:
+      - name: Clean Gradle Cache
+        script: rm -rf ~/.gradle/wrapper/dists/gradle-8.7* || true
+      
+      - name: Download Gradle Wrapper
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew --version || true
+          cd ..
+      
+      - name: Flutter pub get
+        script: flutter pub get
+      
+      - name: Flutter clean
+        script: flutter clean
+      
+      - name: Flutter pub get (after clean)
+        script: flutter pub get
+      
+      - name: Build APK
+        script: flutter build apk --release --no-tree-shake-icons
+    
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
